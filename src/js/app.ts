@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { v4 } from "uuid";
 
 import { Server } from "socket.io";
 import { createServer } from "http";
@@ -27,25 +28,22 @@ app.listen(port, () => {
   console.log(`webroom is running on port ${port}.`);
 });
 
-const users: any = {};
+const rooms: any = {};
 
 const socketToRoom: any = {};
 
+let roomID = "";
 io.on("connection", (socket) => {
   socket.on("join room", () => {
-    const roomID = 5;
-    if (users[roomID]) {
-      const length = users[roomID].length;
-      if (length === 2) {
-        socket.emit("room full");
-        return;
-      }
-      users[roomID].push(socket.id);
+    if (rooms[roomID] && rooms[roomID].length < 4) {
+      rooms[roomID].push(socket.id);
     } else {
-      users[roomID] = [socket.id];
+      roomID = v4();
+      rooms[roomID] = [socket.id];
     }
+    console.log(roomID);
     socketToRoom[socket.id] = roomID;
-    const usersInThisRoom = users[roomID].filter((id: any) => id !== socket.id);
+    const usersInThisRoom = rooms[roomID].filter((id: any) => id !== socket.id);
 
     socket.emit("all users", usersInThisRoom);
   });
@@ -66,10 +64,10 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     const roomID = socketToRoom[socket.id];
-    let room = users[roomID];
+    let room = rooms[roomID];
     if (room) {
       room = room.filter((id: any) => id !== socket.id);
-      users[roomID] = room;
+      rooms[roomID] = room;
       socket.broadcast.emit("user left", socket.id);
     }
   });

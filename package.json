@@ -7,15 +7,19 @@
   "license": "GPLv3",
   "private": false,
   "scripts": {
-    "start": "ts-node ./src/js/app.ts",
+    "start": "nodemon ./src/js/app.ts",
     "lint": "eslint **/*.ts"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^13.0.0",
     "express": "^4.17.2",
+    "knex": "^1.0.1",
     "mysql2": "^2.3.3"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.2",
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.8",
     "@typescript-eslint/eslint-plugin": "^5.9.1",

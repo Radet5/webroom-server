@@ -1,21 +1,39 @@
 import express from "express";
 import cors from "cors";
 import { v4 } from "uuid";
+import fs from "fs";
 
 import { Server } from "socket.io";
-import { createServer } from "http";
+import { createServer } from "https";
 
 //import apiRoutes from "./routes/api-routes";
 import { apiRoutes } from "./routes/api-routes";
+const privateKey = fs.readFileSync(
+  "/etc/letsencrypt/live/radet5.com/privkey.pem",
+  "utf8"
+);
+const certificate = fs.readFileSync(
+  "/etc/letsencrypt/live/radet5.com/cert.pem",
+  "utf8"
+);
+const ca = fs.readFileSync(
+  "/etc/letsencrypt/live/radet5.com/chain.pem",
+  "utf8"
+);
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+  ca,
+};
 
 const app = express();
 const port = 3000;
 
 app.use(cors());
-const server = createServer(app);
+const server = createServer(credentials, app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:1234",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
@@ -35,6 +53,12 @@ const socketToRoom: any = {};
 let roomID = "";
 io.on("connection", (socket) => {
   socket.on("join room", () => {
+    const availableRooms = Object.keys(rooms).filter(
+      (roomID) => rooms[roomID].length < 4
+    );
+    if (availableRooms.length > 0) {
+      roomID = availableRooms[0];
+    }
     if (rooms[roomID] && rooms[roomID].length < 4) {
       rooms[roomID].push(socket.id);
     } else {

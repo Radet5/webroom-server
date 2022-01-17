@@ -9,15 +9,15 @@ import { createServer } from "https";
 //import apiRoutes from "./routes/api-routes";
 import { apiRoutes } from "./routes/api-routes";
 const privateKey = fs.readFileSync(
-  "/etc/letsencrypt/live/radet5.com/privkey.pem",
+  "/etc/letsencrypt/live/api.radet5.com/privkey.pem",
   "utf8"
 );
 const certificate = fs.readFileSync(
-  "/etc/letsencrypt/live/radet5.com/cert.pem",
+  "/etc/letsencrypt/live/api.radet5.com/cert.pem",
   "utf8"
 );
 const ca = fs.readFileSync(
-  "/etc/letsencrypt/live/radet5.com/chain.pem",
+  "/etc/letsencrypt/live/api.radet5.com/chain.pem",
   "utf8"
 );
 const credentials = {

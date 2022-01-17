@@ -19,11 +19,14 @@ async function newConnection(req: Request, res: Response) {
 
 async function poll(req: Request, res: Response) {
   const id = req.body.id;
-  await service.updateConnection(id);
-  const data = {
-    connections: await service.getConnections(),
-  };
-  res.json(data);
+  if (await service.updateConnection(id)) {
+    const data = {
+      connections: await service.getConnections(),
+    };
+    res.json(data);
+  } else {
+    res.status(408).send("Connection timed out");
+  }
 }
 
 export { getConnections, newConnection, poll };

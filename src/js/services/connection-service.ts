@@ -1,12 +1,20 @@
-interface ConnectionInterface {
-    id: number;
-    timestamp: number;
+export interface ConnectionRepositoryInterface {
+  getConnections: () => Promise<Array<Connection>>;
+  newConnection: () => Promise<string>;
+  updateConnection: (id: string) => Promise<boolean>;
 }
 
-export function ConnectionService(connectionRepository: any) {
+export interface Connection {
+  id: string;
+  timestamp: number;
+}
+
+export function ConnectionService(
+  connectionRepository: ConnectionRepositoryInterface
+) {
   async function getConnections() {
     const connections = await connectionRepository.getConnections();
-    return connections.filter((connection: ConnectionInterface) => {
+    return connections.filter((connection: Connection) => {
       const now = new Date().getTime();
       return now - connection.timestamp < 10000;
     });
@@ -16,8 +24,12 @@ export function ConnectionService(connectionRepository: any) {
     return await connectionRepository.newConnection();
   }
 
-  async function updateConnection(id: number) {
-    await connectionRepository.updateConnection(id);
+  async function updateConnection(id: string) {
+    if (await connectionRepository.updateConnection(id)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   return {

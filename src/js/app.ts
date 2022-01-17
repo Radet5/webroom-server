@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import * as bodyParser from "body-parser";
 
 //import apiRoutes from "./routes/api-routes";
 import { apiRoutes } from "./routes/api-routes";

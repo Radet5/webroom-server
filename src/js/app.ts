@@ -2,35 +2,42 @@ import express from "express";
 import cors from "cors";
 import { v4 } from "uuid";
 import fs from "fs";
+import "dotenv/config";
 
 import { Server } from "socket.io";
-import { createServer } from "https";
+import { createServer as createHttpsServer } from "https";
+import { createServer as createHttpServer } from "http";
+
+const ENV = process.env.NODE_ENV || "development";
 
 //import apiRoutes from "./routes/api-routes";
 import { apiRoutes } from "./routes/api-routes";
-const privateKey = fs.readFileSync(
-  "/etc/letsencrypt/live/api.radet5.com/privkey.pem",
-  "utf8"
-);
-const certificate = fs.readFileSync(
-  "/etc/letsencrypt/live/api.radet5.com/cert.pem",
-  "utf8"
-);
-const ca = fs.readFileSync(
-  "/etc/letsencrypt/live/api.radet5.com/chain.pem",
-  "utf8"
-);
-const credentials = {
-  key: privateKey,
-  cert: certificate,
-  ca,
-};
+
+let credentials = {};
+if (ENV === "poduction") {
+  const key = process.env.SSL_KEY || "";
+  const cert = process.env.SSL_CERT || "";
+  const ca = process.env.SSL_CA || "";
+  const privateKey = fs.readFileSync(key, "utf8");
+  const certificate = fs.readFileSync(cert, "utf8");
+  const authority = fs.readFileSync(ca, "utf8");
+  credentials = {
+    key: privateKey,
+    cert: certificate,
+    authority,
+  };
+}
 
 const app = express();
 const port = 3000;
 
 app.use(cors());
-const server = createServer(credentials, app);
+let server;
+if (ENV === "poduction") {
+  server = createHttpsServer(credentials, app);
+} else {
+  server = createHttpServer(app);
+}
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -65,7 +72,7 @@ io.on("connection", (socket) => {
       roomID = v4();
       rooms[roomID] = [socket.id];
     }
-    console.log(roomID);
+    console.log(roomID, new Date().toString());
     socketToRoom[socket.id] = roomID;
     const usersInThisRoom = rooms[roomID].filter((id: any) => id !== socket.id);
 

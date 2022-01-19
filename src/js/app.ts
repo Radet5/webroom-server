@@ -13,8 +13,8 @@ const ENV = process.env.NODE_ENV || "development";
 //import apiRoutes from "./routes/api-routes";
 import { apiRoutes } from "./routes/api-routes";
 
-let credentials = {};
-if (ENV === "poduction") {
+let credentials = {key: "", cert: "", authority: ""};
+if (ENV === "production") {
   const key = process.env.SSL_KEY || "";
   const cert = process.env.SSL_CERT || "";
   const ca = process.env.SSL_CA || "";
@@ -33,7 +33,7 @@ const port = 3000;
 
 app.use(cors());
 let server;
-if (ENV === "poduction") {
+if (ENV === "production") {
   server = createHttpsServer(credentials, app);
 } else {
   server = createHttpServer(app);
